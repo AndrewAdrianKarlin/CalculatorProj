@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 
-def calculation(num1, num2, opn):
+##Logic to run the calculation from the calculator and/or return an error.
+def calclogic(num1, num2, opn):
     if opn == "/":
         out= num1 / num2
     if opn == "*":
@@ -13,17 +14,41 @@ def calculation(num1, num2, opn):
         return "ERR"
     return out
 
-def displaylogic(instrnum, currstrnum):
-    if len(currstrnum)>7:
-        return currstrnum
+##Logic to concatenate button presses into a number and/or cutoff if 8 characters.
+def displaylogic(instrnum, curstrnum):
+    if len(curstrnum)>7:
+        return curstrnum
     else:
-        currstrnum = currstrnum + instrnum
-        return currstrnum
+        curstrnum = curstrnum + instrnum
+        return curstrnum
+
+##Logic to identify if an input is a number, operation or clear and to process appropriately.
+def inputlogic(instr, num1, num2, opn):
+##need to separate C vs. AC
+    if instr == "C" or instr == "AC":
+        instr = ""
+        num1 = ""
+        num2 = ""
+        opn = ""
+        return num1, num2, opn
+    if instr == "/" or instr == "*" or instr == "-" or instr == "+":
+        opn = instr
+        instr = ""
+        return num1, num2, opn
+    if instr == "=":
+        num2 = calclogic(num1, num2, opn)
+        instr = ""
+        return num1, num2, opn
+ ##Need logic for numbers
+    else:
 
 
-sg.theme('DarkAmber')    # Keep things interesting for your users
 
-layout = [  [sg.InputText("replace with an output display", size=(24, 1))],
+curstrnum = ""
+sg.theme('DarkAmber')
+
+
+layout = [  [sg.Text("", size=(24, 1), key='-OUTPUT-')],
             [sg.Button("/", size=(3, 1)), sg.Button("7", size=(3, 1)), sg.Button("8", size=(3, 1)), sg.Button("9", size=(3, 1))],
             [sg.Button("*", size=(3, 1)), sg.Button("4", size=(3, 1)), sg.Button("5", size=(3, 1)), sg.Button("6", size=(3, 1))],
             [sg.Button("-", size=(3, 1)), sg.Button("1", size=(3, 1)), sg.Button("2", size=(3, 1)), sg.Button("3", size=(3, 1))],
@@ -33,8 +58,10 @@ window = sg.Window("Andrew's Calculator", layout, element_justification='c')
 
 while True:
     event, values = window.read()
-    # End program if user closes window or
-    # presses the OK button
     if event == sg.WIN_CLOSED:
         break
+    else:
+        curstrnum = displaylogic(event, curstrnum)
+        window['-OUTPUT-'].update(curstrnum)
+        continue
 window.close()
