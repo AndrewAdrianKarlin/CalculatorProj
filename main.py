@@ -22,29 +22,47 @@ def displaylogic(instrnum, curstrnum):
         curstrnum = curstrnum + instrnum
         return curstrnum
 
-##Logic to identify if an input is a number, operation or clear and to process appropriately.
-def inputlogic(instr, num1, num2, opn):
-##need to separate C vs. AC
-    if instr == "C" or instr == "AC":
-        instr = ""
-        num1 = ""
-        num2 = ""
-        opn = ""
-        return num1, num2, opn
-    if instr == "/" or instr == "*" or instr == "-" or instr == "+":
-        opn = instr
-        instr = ""
-        return num1, num2, opn
-    if instr == "=":
-        num2 = calclogic(num1, num2, opn)
-        instr = ""
-        return num1, num2, opn
- ##Need logic for numbers
+##Logic to run "clear" function.
+def clearmem(inputstr, buffer, numstore, opnstore):
+    return  inputstr, buffer, numstore, opnstore
+
+def opnlogic(inputstr, buffer, numstore, opnstore):
+    if numstore == "":
+        numstore = buffer
+        buffer = ""
+        opnstore = inputstr
     else:
+        buffer = calclogic(buffer, numstore, opnstore)
+        numstore = ""
+        opnstore = inputstr
+    return buffer, numstore, opnstore
 
+##Logic to identify if an input is a number, operation or clear and to process appropriately.
+def inputlogic(inputstr, buffer, numstore, opnstore):
+    if inputstr == "C":
+        inputstr, buffer, numstore, opnstore = clearmem(inputstr, buffer, numstore, opnstore)
+        return buffer, numstore, opnstore
+    if inputstr == "AC":
+        buffer = "0"
+        numstore = ""
+        opnstore = ""
+        return buffer, numstore, opnstore
+    if inputstr == "/" or inputstr == "*" or inputstr == "-" or inputstr == "+":
+        buffer, numstore, opnstore = opnlogic(inputstr, buffer, numstore, opnstore)
+        return buffer, numstore, opnstore
+    if inputstr == "=":
+        if opnstore != "":
+            buffer = calclogic(buffer, numstore, opnstore)
+            opnstore = ""
+            numstore = ""
+        return buffer, numstore, opnstore
+    else:
+        buffer = displaylogic(inputstr, buffer)
+        return buffer, numstore, opnstore
 
-
-curstrnum = ""
+buffer = ""
+numstore = ""
+opnstore = ""
 sg.theme('DarkAmber')
 
 
@@ -61,7 +79,7 @@ while True:
     if event == sg.WIN_CLOSED:
         break
     else:
-        curstrnum = displaylogic(event, curstrnum)
-        window['-OUTPUT-'].update(curstrnum)
+        buffer, numstore, opnstore = inputlogic(event, buffer, numstore, opnstore)
+        window['-OUTPUT-'].update(buffer)
         continue
 window.close()
